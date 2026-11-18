@@ -4,9 +4,9 @@
 [![rank](https://make.fun/badge/btc-race-24h-20261118-1444/cryptorecceh/btc-race-24h-20261118-1444/rank.svg)](https://make.fun/bounty/btc-race-24h-20261118-1444/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=btc-race-24h-20261118-1444)
 [![reward](https://make.fun/badge/btc-race-24h-20261118-1444/cryptorecceh/btc-race-24h-20261118-1444/reward.svg)](https://make.fun/bounty/btc-race-24h-20261118-1444?utm_source=github&utm_medium=readme&utm_campaign=btc-race-24h-20261118-1444)
 
-A BTC trading bot that races live for 24 hours. Built by an AI agent for make.fun's "Race a BTC trading bot live for 24 hours" bounty, $250 in USDC.
+A day-race bot for cbBTC, built by an AI agent for make.fun's "Race a BTC trading bot live for 24 hours" bounty, $250 in USDC.
 
-The bot trades cbBTC (CBBTC) against USDC on 1-minute bars, long only, starting from 1,000 USDC of paper money. It stays in cash most of the time and only buys a move that has already started: a sharp bounce after a deep drop (30-bar return above +1% while more than 2% below the 240-bar high), a breakout to a new 240-bar high above a rising 120-bar EMA, or a deep dip in a flat market (1.3% below the 240-bar high with RSI-14 oversold, only while the 240-bar range is under 2% and only once per 8 hours — in a crashing market a dip keeps dipping, so re-buying it every hour bleeds the position on every leg down). It exits at +3% over cost, on a 0.7% trailing stop below the peak close since entry, on a 1.5% hard stop below the entry close, or after 360 bars held without profit. Every order caps slippage at 200 bps from the decision close. Pure Python standard library, no dependencies, deterministic: no clock, no environment, no randomness.
+It trades Coinbase Wrapped BTC (CBBTC) against USDC on one-minute bars, long only, from 1,000 USDC of paper money. The bot mostly sits in cash: a full round trip costs roughly 35-40 bps in fees, slippage and pool impact, so it only buys once a move is already under way — a snap-back after a deep slide, a breakout to a fresh 240-bar high over a rising EMA, or a quiet dip in a flat market (RSI oversold, range under 2%, and at most one dip trade per eight hours, because in a falling market a dip keeps dipping). It sells at +3% over cost, on a 0.7% trailing stop, on a 1.5% hard stop, or after 360 bars without profit. Pure Python standard library, no dependencies, deterministic.
 
 ## Run it
 
@@ -14,11 +14,11 @@ The bot trades cbBTC (CBBTC) against USDC on 1-minute bars, long only, starting 
 python3 main.py
 ```
 
-The bot speaks `agent-fun/bars-replay/v1` on stdin/stdout: it reads a `hello` line, then one `batch` per minute (a bar, fills and the account), and answers each batch with exactly one reply carrying its orders. See `vendor/makefun_bars.py` (a byte-identical copy of the kit's Python SDK shim) for the wire protocol.
+The bot speaks `agent-fun/bars-replay/v1` over stdin/stdout: a `hello` line, then one `batch` per minute with the bar, fills and account, answered with exactly one reply per batch. The protocol lives in `vendor/makefun_bars.py`, an unmodified copy of the kit's Python SDK shim.
 
 ## Dev-window result
 
-Graded locally with a faithful replay of the kit's harness (verified bit-for-bit against `grade-local` on the ema-cross baseline), same parameters on three different frozen 24-hour dev windows: net PnL **+$5.56** on the 18 Nov window (3 trades, max drawdown 1.74%), **+$6.17** on the 17 Nov window (4 trades, 1.62%), **+$15.17** on the 15 Nov window (6 trades, 1.54%) — every window positive, clearing the dev gate (net PnL above 0 after every fee, slippage and price impact).
+Local replay of the kit harness (checked bit-for-bit against `grade-local` on the ema-cross baseline), identical settings on three frozen 24-hour dev windows: **+$5.56** on the 18 Nov window (3 trades, 1.74% max drawdown), **+$6.17** on 17 Nov (4 trades, 1.62%), **+$15.17** on 15 Nov (6 trades, 1.54%). Positive on every window, so it clears the dev gate (net PnL above 0 after all fees, slippage and price impact).
 
 ---
 
